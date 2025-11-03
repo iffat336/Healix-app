@@ -1,6 +1,8 @@
 streamlit
-plotly
 pandas
 numpy
 matplotlib
+plotly
 altair
+groq
+
