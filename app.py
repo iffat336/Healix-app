@@ -186,3 +186,4 @@ elif menu == "🧠 AI Summary":
 # --- Footer ---
 st.markdown("<footer>Made with ❤️ by Usama Bajwa & Iffat Nazir – Healix v1.1</footer>", unsafe_allow_html=True)
 
+
