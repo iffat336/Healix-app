@@ -1,0 +1,22 @@
+# Byte-compiled / cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.env
+.venv
+
+# Streamlit secrets
+.streamlit/secrets.toml
+
+# Mac / Windows system files
+.DS_Store
+Thumbs.db
+
+# Jupyter / notebook checkpoints
+.ipynb_checkpoints
+
+# Logs
+*.log
