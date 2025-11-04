@@ -68,47 +68,75 @@ elif menu == "🥗 Meal Plan":
             st.error(f"⚠️ Error generating meal plan: {e}")
 
 # --- WORKOUT PLAN SECTION ---
-elif menu == "🏋️ Workout Plan":
+# --- Workout Generator ---
+elif menu == "🏋️ Workout Generator":
     st.header("🏋️ Personalized Workout Plan")
-    fitness_level = st.selectbox("Select your fitness level:", ["Beginner", "Intermediate", "Advanced"])
-    duration = st.slider("Workout duration (minutes):", 10, 90, 30)
 
-    # Example animated workout videos (YouTube embeds)
-    workout_videos = {
-        "Push-Ups": "https://www.youtube.com/embed/IODxDxX7oi4",
-        "Squats": "https://www.youtube.com/embed/aclHkVaku9U",
-        "Plank": "https://www.youtube.com/embed/pSHjTRCQxIw",
-        "Lunges": "https://www.youtube.com/embed/QOVaHwm-Q6U",
-        "Burpees": "https://www.youtube.com/embed/TU8QYVW0gDU"
-    }
+    goal = st.selectbox("Select your fitness goal", [
+        "Weight Loss", "Muscle Gain", "Flexibility", "Endurance", "Women Wellness", "Yoga & Mindfulness"
+    ])
+    duration = st.slider("Workout duration (minutes)", 10, 90, 30)
 
-    if st.button("Generate My Workout 💪"):
-        workout_prompt = (
-            f"Create a {duration}-minute {fitness_level.lower()} workout plan "
-            "including warm-up, main exercises, and cool-down."
-        )
+    if st.button("Generate My Workout Plan"):
+        workout_prompt = f"Generate a {duration}-minute workout plan for {goal}. Include warm-up, main exercises, and cool down."
 
-        try:
+        with st.spinner("Creating your personalized plan..."):
             response = client.chat.completions.create(
                 model="llama-3.3-70b-versatile",
                 messages=[{"role": "user", "content": workout_prompt}]
             )
-            workout_plan = response.choices[0].message.content
-            st.success(workout_plan)
 
-            # Display exercise videos dynamically
-            st.markdown("### 🎥 Example Workout Videos:")
-            cols = st.columns(2)
-            for i, (exercise, url) in enumerate(workout_videos.items()):
-                with cols[i % 2]:
+        try:
+            plan = response.choices[0].message.content
+            st.success(plan)
+
+            # --- Workout Videos Section ---
+            st.subheader("🎥 Follow Along with Exercise Videos")
+
+            # General workout video library
+            videos = {
+                "Weight Loss": [
+                    ("Jumping Jacks", "https://media.giphy.com/media/xT0GqnYyuw8hnVfCA4/giphy.mp4"),
+                    ("Burpees", "https://media.giphy.com/media/3o7TKz5d9bLrj3aYus/giphy.mp4"),
+                    ("Mountain Climbers", "https://media.giphy.com/media/3o7TKtnuHOHHUjR38Y/giphy.mp4"),
+                ],
+                "Muscle Gain": [
+                    ("Push-ups", "https://media.giphy.com/media/l3vR3z8j2T8zGmYdC/giphy.mp4"),
+                    ("Squats", "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.mp4"),
+                    ("Lunges", "https://media.giphy.com/media/3o7TKtnuHOHHUjR38Y/giphy.mp4"),
+                ],
+                "Flexibility": [
+                    ("Side Stretch", "https://media.giphy.com/media/l2Sq3XKef4nFasFz2/giphy.mp4"),
+                    ("Neck Rotation", "https://media.giphy.com/media/l0HlA0h2Zb0h6tBtC/giphy.mp4"),
+                    ("Torso Twist", "https://media.giphy.com/media/l0MYC0LajbaPoEADu/giphy.mp4"),
+                ],
+                "Endurance": [
+                    ("Running in Place", "https://media.giphy.com/media/xT0xeJpnrWC4XWblEk/giphy.mp4"),
+                    ("Skipping Rope", "https://media.giphy.com/media/l2JhJz0v6t9J7hbQ4/giphy.mp4"),
+                    ("High Knees", "https://media.giphy.com/media/26gsspf0C6H7oO0cE/giphy.mp4"),
+                ],
+                "Women Wellness": [
+                    ("Pelvic Tilt", "https://media.giphy.com/media/3ohs7Hf7q6P6z2lWwQ/giphy.mp4"),
+                    ("Glute Bridge", "https://media.giphy.com/media/l0MYsG6zF9XG5vR7q/giphy.mp4"),
+                    ("Cat-Cow Stretch", "https://media.giphy.com/media/26vIfnLrCqGgV8WbO/giphy.mp4"),
+                ],
+                "Yoga & Mindfulness": [
+                    ("Sun Salutation", "https://media.giphy.com/media/3ohhwF34cGDoFFhRfy/giphy.mp4"),
+                    ("Child’s Pose", "https://media.giphy.com/media/l2SqbHjY3VQdAqYzW/giphy.mp4"),
+                    ("Tree Pose", "https://media.giphy.com/media/3ov9jNziFTMfzSumAw/giphy.mp4"),
+                ]
+            }
+
+            # Show relevant category videos
+            if goal in videos:
+                for exercise, video_url in videos[goal]:
                     st.markdown(f"**{exercise}**")
-                    st.video(url)
+                    st.video(video_url)
+            else:
+                st.info("Select a goal to see exercise videos!")
 
-            # Save to history
-            st.session_state.workout_history.append({"level": fitness_level, "duration": duration, "plan": workout_plan})
         except Exception as e:
-            st.error(f"⚠️ Error generating workout: {e}")
-
+            st.error(f"Error: {e}")
 # --- PROGRESS TRACKER SECTION ---
 elif menu == "📈 Progress Tracker":
     st.header("📈 Track Your Progress")
@@ -140,3 +168,4 @@ elif menu == "🕒 History":
             for i, record in enumerate(st.session_state.workout_history[::-1]):
                 with st.expander(f"Workout #{len(st.session_state.workout_history)-i} — {record['level']} ({record['duration']} mins)"):
                     st.write(record["plan"])
+
