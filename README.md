@@ -1,103 +1,84 @@
-# 🌿 Healix – Your AI-Powered Personal Wellness Companion
+🧠 Healix: AI-Powered Health & Wellness Assistant
+🌍 Live Demo
 
-**Created by:** Iffat Nazir & Usama Bajwa  
-**Technology:** Streamlit, Python, AI/ML, Groq API  
-**Version:** 1.0 (Phase 1 Release)
+👉 Try Healix on Streamlit Cloud
 
----
+💡 Overview
 
-## 🧠 Overview
+Healix is an intelligent health and wellness app powered by AI (Groq API) and Streamlit.
+It generates personalized meal plans, workout routines (with animated videos), and helps users track and visualize their progress — all in one place.
 
-**Healix** is an AI-driven wellness assistant designed to help users achieve balanced health through personalized diet, exercise, and lifestyle recommendations. By combining intelligent chat guidance with real-time insights, Healix empowers individuals to improve their fitness, nutrition, and overall wellbeing — all in one smart interface.
+Healix brings together the power of AI, fitness science, and interactive visualization to promote balanced and data-driven well-being.
 
-This project is the first of its kind built and tested by **Kaggle innovators** and designed for streamlined deployment via **Streamlit Cloud** and **Google Play Store**.
+🚀 Key Features
+Feature	Description
+🥗 AI Meal Planner	Generates 3-day personalized diet plans based on weight, goal, and activity level.
+🏋️ Workout Generator	Creates tailored exercise routines (Beginner → Advanced) with YouTube demo videos.
+📈 Progress Tracker	Upload progress CSV files and visualize trends with dynamic charts.
+🕒 History Section	Automatically saves your previously generated plans for later review.
+🤖 Powered by Groq Llama 3.3	Uses state-of-the-art LLM inference for nutrition and fitness planning.
+🧩 Tech Stack
 
----
+Frontend: Streamlit
 
-## ✨ Features
+Backend AI: Groq API (LLaMA 3.3 70B Versatile)
 
-- 🩺 **AI Health Chat:** Ask questions about diet, mental health, and exercise routines.
-- 🍎 **Meal Planner:** Get daily meal suggestions tailored to your fitness goals.
-- 🧘 **Workout Recommender:** Smart exercise plans for all levels.
-- 📊 **Progress Dashboard:** Visualize BMI, calories, and daily progress.
-- 📈 **Smart Insights:** Track lifestyle patterns and receive AI-driven tips.
-- 💬 **Chat with Healix:** Real-time support through conversational AI powered by Groq.
+Data Handling: Pandas
 
----
+Visualization: Streamlit charts
 
-## 🧩 Project Structure
-Healix/
-├── app.py
-├── requirements.txt
-├── README.md
-├── LICENSE
-├── .gitignore
-└── .streamlit/
-└── secrets.toml
+Deployment: Streamlit Cloud
 
+⚙️ Setup Instructions
 
----
+Clone this repository
 
-## ⚙️ Installation Guide
+git clone https://github.com/iffat336/healix-app.git
+cd healix-app
 
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/iffat336/Healix.git
-cd Healix
-2. Install Dependencies
-### 1. Clone the Repository
-```bash
-git clone https://github.com/iffat336/Healix.git
-cd Healix
+Install dependencies
+
 pip install -r requirements.txt
-3. Run the App
+
+
+Add your API key
+In Streamlit Cloud → Settings → Secrets, add:
+
+GROQ_API_KEY = "your_api_key_here"
+
+
+Run locally
+
 streamlit run app.py
-🔑 Streamlit Secrets (For Developers)
 
-Create a file at .streamlit/secrets.toml and add your Groq API key:
+📸 Preview
+Section	Screenshot
+Home	🏠 Welcome screen with navigation
+Meal Plan	🥗 AI diet plan generation
+Workout	💪 Personalized workouts + embedded videos
+Progress Tracker	📊 Line chart for uploaded CSV
+History	🕒 Saved past plans
+🌱 Future Enhancements
 
-[api_keys]
-groq = "your_api_key_here"
+🔐 Persistent history (save user data to CSV or Firebase)
 
-🚀 Deployment
+💬 AI chat-based fitness assistant
 
-Deploy easily on Streamlit Cloud:
+📊 Calorie tracking dashboard
 
-Go to https://share.streamlit.io
+🧬 Integration with wearable data (Fitbit / Apple Health)
 
-Select your Healix repository
+👩‍💻 About the Developer
 
-Main file path → app.py
+Iffat Nazir — AI researcher and aspiring data scientist passionate about using emerging technologies to improve human well-being.
+📚 Background in Plant Breeding & Genetics (MS Hons.), with growing expertise in Data Science, AI, and Applied Research.
 
-Click Deploy
+🔗 LinkedIn
+ | GitHub
 
-👥 Authors
+⭐ Support the Project
 
-Iffat Nazir – Researcher | AI & Data Science Enthusiast
-Usama Bajwa – Developer | AI Model Integration & Streamlit UI
-
-📄 License
-
-This project is licensed under the MIT License — see the LICENSE
- file for details.
-
-🌍 Future Vision
-
-Upcoming phases will include:
-
-Integration with wearable devices (IoT support)
-
-AI-driven emotion recognition
-
-Personalized fitness goals tracking
-
-Multilingual support
-
-Android and iOS mobile apps
-
-© 2025 Healix – Designed with care by Iffat Nazir & Usama Bajwa
-
-
-
-
+If you like this project, please consider giving it a ⭐ on GitHub
+!
+Your support motivates further development and research into AI-driven health systems.
