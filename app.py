@@ -157,6 +157,7 @@ elif menu == "🏋️‍♀️ AI Workout Plan":
         with st.spinner("Preparing your plan..."):
             workout_prompt = f"Design a {level.lower()} {days}-day workout plan. Focus on home exercises with minimal equipment."
            response = client.chat.completions.create(
+ response = client.chat.completions.create(
     model="llama-3.3-70b-versatile",
     messages=[{"role": "user", "content": workout_prompt}]
 )
@@ -166,8 +167,6 @@ try:
 except Exception as e:
     st.error(f"Error: {e}")
     st.write(response)
-
-
 
 # --- Progress Tracker ---
 elif menu == "📈 Progress Tracker":
@@ -192,6 +191,7 @@ elif menu == "🧠 AI Summary":
 
 # --- Footer ---
 st.markdown("<footer>Made with ❤️ by Usama Bajwa & Iffat Nazir – Healix v1.1</footer>", unsafe_allow_html=True)
+
 
 
 
