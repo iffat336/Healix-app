@@ -1,6 +1,7 @@
 🧠 Healix: AI-Powered Health & Wellness Assistant
 🌍 Live Demo
 
+
 👉 Try Healix on Streamlit Cloud
 
 💡 Overview
@@ -11,13 +12,15 @@ It generates personalized meal plans, workout routines (with animated videos), a
 Healix brings together the power of AI, fitness science, and interactive visualization to promote balanced and data-driven well-being.
 
 🚀 Key Features
-Feature	Description
-🥗 AI Meal Planner	Generates 3-day personalized diet plans based on weight, goal, and activity level.
-🏋️ Workout Generator	Creates tailored exercise routines (Beginner → Advanced) with YouTube demo videos.
-📈 Progress Tracker	Upload progress CSV files and visualize trends with dynamic charts.
-🕒 History Section	Automatically saves your previously generated plans for later review.
-🤖 Powered by Groq Llama 3.3	Uses state-of-the-art LLM inference for nutrition and fitness planning.
-🧩 Tech Stack
+
+| Feature                          | Description                                                                            |
+| -------------------------------- | -------------------------------------------------------------------------------------- |
+| 🥗 **AI Meal Planner**           | Generates 3-day personalized diet plans based on weight, goal, and activity level.     |
+| 🏋️ **Workout Generator**        | Creates tailored exercise routines (Beginner → Advanced) with **YouTube demo videos**. |
+| 📈 **Progress Tracker**          | Upload progress CSV files and visualize trends with dynamic charts.                    |
+| 🕒 **History Section**           | Automatically saves your previously generated plans for later review.                  |
+| 🤖 **Powered by Groq Llama 3.3** | Uses state-of-the-art LLM inference for nutrition and fitness planning.                |
+
 
 Frontend: Streamlit
 
@@ -53,13 +56,14 @@ Run locally
 streamlit run app.py
 
 📸 Preview
-Section	Screenshot
-Home	🏠 Welcome screen with navigation
-Meal Plan	🥗 AI diet plan generation
-Workout	💪 Personalized workouts + embedded videos
-Progress Tracker	📊 Line chart for uploaded CSV
-History	🕒 Saved past plans
-🌱 Future Enhancements
+| Section          | Screenshot                                 |
+| ---------------- | ------------------------------------------ |
+| Home             | 🏠 Welcome screen with navigation          |
+| Meal Plan        | 🥗 AI diet plan generation                 |
+| Workout          | 💪 Personalized workouts + embedded videos |
+| Progress Tracker | 📊 Line chart for uploaded CSV             |
+| History          | 🕒 Saved past plans                        |
+
 
 🔐 Persistent history (save user data to CSV or Firebase)
 
