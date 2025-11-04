@@ -160,7 +160,18 @@ elif menu == "🏋️‍♀️ AI Workout Plan":
                 model="llama-3.3-70b-versatile",
                 messages=[{"role": "user", "content": workout_prompt}]
             )
-            st.success(response.choices[0].message["content"])
+            response = client.chat.completions.create(
+    model="llama-3.3-70b-versatile",
+    messages=[{"role": "user", "content": workout_prompt}]
+)
+ st.success(response.choices[0].message["content"])
+
+try:
+    st.success(response.choices[0].message.content)
+except Exception as e:
+    st.error(f"Error: {e}")
+    st.write(response)
+
 
 # --- Progress Tracker ---
 elif menu == "📈 Progress Tracker":
@@ -185,5 +196,6 @@ elif menu == "🧠 AI Summary":
 
 # --- Footer ---
 st.markdown("<footer>Made with ❤️ by Usama Bajwa & Iffat Nazir – Healix v1.1</footer>", unsafe_allow_html=True)
+
 
 
