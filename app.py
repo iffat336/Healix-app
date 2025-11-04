@@ -1,108 +1,176 @@
 import streamlit as st
 import pandas as pd
-import datetime
-import json
-from groq import Groq
+import numpy as np
+from datetime import datetime
+import sqlite3
+import openai  # or your existing LLM client
 
-# --- Initialize Client ---
-client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+# --- DATABASE SETUP ---
+conn = sqlite3.connect("healix_users.db", check_same_thread=False)
+c = conn.cursor()
 
-# --- App Title ---
-st.set_page_config(page_title="Healix - Your Smart Health Companion", page_icon="💪", layout="wide")
-st.title("💪 Healix: Your Smart Health & Wellness Companion")
+# Users table
+c.execute("""
+CREATE TABLE IF NOT EXISTS users(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE,
+    password TEXT,
+    date_joined TEXT
+)
+""")
 
-# --- Navigation ---
-menu = st.sidebar.selectbox("Navigate", ["🏠 Home", "🥗 Meal Planner", "🏋️ Workout Generator", "📈 Progress Tracker", "💧 Water Reminder", "📜 History"])
+# Activity/history table
+c.execute("""
+CREATE TABLE IF NOT EXISTS history(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT,
+    type TEXT,
+    content TEXT,
+    timestamp TEXT
+)
+""")
+conn.commit()
 
-# --- Home Section ---
+# --- FUNCTIONS ---
+def signup(username, password):
+    try:
+        c.execute("INSERT INTO users (username, password, date_joined) VALUES (?, ?, ?)",
+                  (username, password, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        conn.commit()
+        st.success("Account created! Please login.")
+    except sqlite3.IntegrityError:
+        st.error("Username already exists.")
+
+def login(username, password):
+    c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
+    return c.fetchone()
+
+def save_activity(username, type_, content):
+    c.execute("INSERT INTO history (username, type, content, timestamp) VALUES (?, ?, ?, ?)",
+              (username, type_, content, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+    conn.commit()
+
+# --- SIDEBAR LOGIN/SIGNUP ---
+st.sidebar.title("User Access")
+choice = st.sidebar.selectbox("Login / Signup", ["Login", "Signup"])
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+    st.session_state.username = ""
+
+if choice == "Signup":
+    st.sidebar.subheader("Create Account")
+    new_user = st.sidebar.text_input("Username")
+    new_pass = st.sidebar.text_input("Password", type="password")
+    if st.sidebar.button("Sign Up"):
+        if new_user and new_pass:
+            signup(new_user, new_pass)
+        else:
+            st.sidebar.warning("Enter both username and password.")
+
+elif choice == "Login":
+    st.sidebar.subheader("Login")
+    username = st.sidebar.text_input("Username")
+    password = st.sidebar.text_input("Password", type="password")
+    if st.sidebar.button("Login"):
+        user = login(username, password)
+        if user:
+            st.session_state.logged_in = True
+            st.session_state.username = username
+            st.success(f"Logged in as {username}")
+        else:
+            st.error("Incorrect username or password")
+
+# --- MAIN APP ---
+st.title("🤖 Healix AI Health Companion")
+
+# Menu
+menu = st.sidebar.selectbox("Menu", ["🏠 Home", "🥗 Meal Plan", "💪 Workout Generator",
+                                     "💧 Water Tracker", "📈 Progress Tracker", "👤 Profile"])
+
+# --- PROFILE & HISTORY ---
+if st.session_state.logged_in and menu == "👤 Profile":
+    st.header(f"👤 Profile: {st.session_state.username}")
+
+    # User info
+    c.execute("SELECT date_joined FROM users WHERE username=?", (st.session_state.username,))
+    join_date = c.fetchone()[0]
+    st.write(f"Member since: {join_date}")
+
+    # Activity history
+    st.subheader("📝 Activity History")
+    c.execute("SELECT type, content, timestamp FROM history WHERE username=? ORDER BY timestamp DESC",
+              (st.session_state.username,))
+    history_data = c.fetchall()
+    if history_data:
+        df_history = pd.DataFrame(history_data, columns=["Type", "Content", "Timestamp"])
+        st.dataframe(df_history)
+    else:
+        st.write("No history yet.")
+
+    # Manual activity add (optional)
+    st.subheader("Add Activity")
+    activity_type = st.selectbox("Type", ["Meal Plan", "Workout", "Water Intake"])
+    activity_content = st.text_area("Content")
+    if st.button("Save Activity"):
+        if activity_content.strip():
+            save_activity(st.session_state.username, activity_type, activity_content)
+            st.success("Activity saved!")
+        else:
+            st.warning("Enter some content to save.")
+
+# --- HOME ---
 if menu == "🏠 Home":
-    st.subheader("Welcome to Healix 👋")
-    st.write("""
-    Healix helps you build a healthy lifestyle by combining AI and data-driven insights.
-    
-    **Features:**
-    - 🥗 Personalized Meal Planning  
-    - 🏋️ AI Workout Recommendations  
-    - 💧 Smart Water Intake Reminders  
-    - 📈 Progress Tracking  
-    - 📜 Save & View Your Health History  
-    """)
+    st.write("Welcome to Healix! Use the sidebar to navigate your health companion features.")
 
-# --- Meal Planner ---
-elif menu == "🥗 Meal Planner":
-    st.header("🥗 Personalized Meal Planner")
-    goal = st.selectbox("Select your goal", ["Lose Weight", "Gain Muscle", "Stay Fit"])
-    dietary = st.selectbox("Any dietary preference?", ["No Preference", "Vegetarian", "Vegan", "Keto", "Low Carb"])
-    calories = st.number_input("Daily calorie target", min_value=1200, max_value=4000, value=2000)
-
-    if st.button("Generate My Meal Plan"):
-        meal_prompt = f"Create a {goal} meal plan for a {dietary} person with {calories} calories per day. Include breakfast, lunch, dinner, and snacks."
+# --- MEAL PLAN GENERATOR ---
+elif menu == "🥗 Meal Plan" and st.session_state.logged_in:
+    st.header("🥗 Personalized Meal Plan")
+    user_goal = st.selectbox("Select your goal", ["Weight Loss", "Muscle Gain", "Maintenance"])
+    if st.button("Generate Meal Plan"):
+        meal_prompt = f"Generate a detailed meal plan for {user_goal}."
         try:
-            response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+            # Replace with your LLM client
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
                 messages=[{"role": "user", "content": meal_prompt}]
             )
-            plan = response.choices[0].message.content
-            st.success(plan)
-
-            # Save history
-            history = {"date": str(datetime.date.today()), "type": "Meal Plan", "details": plan}
-            with open("history.json", "a") as f:
-                f.write(json.dumps(history) + "\n")
+            meal_text = response.choices[0].message.content
+            st.success(meal_text)
+            save_activity(st.session_state.username, "Meal Plan", meal_text)
         except Exception as e:
             st.error(f"Error generating meal plan: {e}")
 
-# --- Workout Generator ---
-elif menu == "🏋️ Workout Generator":
-    st.header("🏋️ AI Workout Generator")
-    level = st.selectbox("Your fitness level", ["Beginner", "Intermediate", "Advanced"])
-    goal = st.selectbox("Goal", ["Fat Loss", "Muscle Gain", "Flexibility", "Endurance"])
-    duration = st.slider("Workout duration (minutes)", 10, 90, 30)
-
-    if st.button("Generate My Workout"):
-        workout_prompt = f"Generate a {duration}-minute {level} workout plan focused on {goal}. Include warm-up, main sets, and cool-down."
+# --- WORKOUT GENERATOR ---
+elif menu == "💪 Workout Generator" and st.session_state.logged_in:
+    st.header("💪 Personalized Workout Plan")
+    workout_goal = st.selectbox("Select your goal", ["Strength", "Cardio", "Flexibility"])
+    if st.button("Generate Workout"):
+        workout_prompt = f"Generate a workout routine for {workout_goal}."
         try:
-            response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
                 messages=[{"role": "user", "content": workout_prompt}]
             )
-            workout = response.choices[0].message.content
-            st.success(workout)
-
-            # Save history
-            history = {"date": str(datetime.date.today()), "type": "Workout", "details": workout}
-            with open("history.json", "a") as f:
-                f.write(json.dumps(history) + "\n")
+            workout_text = response.choices[0].message.content
+            st.success(workout_text)
+            save_activity(st.session_state.username, "Workout", workout_text)
         except Exception as e:
             st.error(f"Error generating workout: {e}")
 
-# --- Progress Tracker ---
-elif menu == "📈 Progress Tracker":
+# --- WATER TRACKER ---
+elif menu == "💧 Water Tracker" and st.session_state.logged_in:
+    st.header("💧 Water Intake Tracker")
+    water = st.number_input("Enter glasses of water drank today", min_value=0, step=1)
+    if st.button("Save Water Intake"):
+        save_activity(st.session_state.username, "Water Intake", f"{water} glasses")
+        st.success("Water intake saved!")
+
+# --- PROGRESS TRACKER ---
+elif menu == "📈 Progress Tracker" and st.session_state.logged_in:
     st.header("📈 Track Your Progress")
     uploaded = st.file_uploader("Upload your progress CSV (Week, Weight, Calories)", type="csv")
-
-    if uploaded:
-        df = pd.read_csv(uploaded)
-        st.write("Your Progress Data:")
-        st.dataframe(df)
-        st.line_chart(df.set_index(df.columns[0]))
-
-# --- Water Intake Reminder ---
-elif menu == "💧 Water Reminder":
-    st.header("💧 Stay Hydrated!")
-    weight = st.number_input("Enter your weight (kg):", min_value=30, max_value=200, value=60)
-    water_intake = round(weight * 35 / 1000, 2)
-    st.success(f"You should drink approximately {water_intake} liters of water per day 💦")
-
-    st.info("💡 Tip: Drink a glass of water every 2 hours to maintain hydration.")
-
-# --- History Section ---
-elif menu == "📜 History":
-    st.header("📜 Your Saved History")
-    try:
-        with open("history.json", "r") as f:
-            data = [json.loads(line) for line in f]
-            df = pd.DataFrame(data)
-            st.dataframe(df)
-    except FileNotFoundError:
-        st.warning("No history found yet. Generate your first plan to start tracking!")
+    if uploaded is not None:
+        df_progress = pd.read_csv(uploaded)
+        st.dataframe(df_progress)
+        st.line_chart(df_progress.set_index("Week"))
