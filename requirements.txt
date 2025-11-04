@@ -5,4 +5,8 @@ matplotlib
 plotly
 altair
 groq
+openai
+
+
+
 
